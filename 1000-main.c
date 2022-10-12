@@ -1,112 +1,61 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "deck.h"
 
-/**
- * sort_deck - sorts a deck of card
- * @deck: doubly linked list to sort
- */
-void sort_deck(deck_node_t **deck)
+void print_deck(const deck_node_t *deck)
 {
-	deck_node_t *curr;
-	size_t len;
-	deck_node_t *one, *two, *three, *four;
+    size_t i;
+    char kinds[4] = {'S', 'H', 'C', 'D'};
 
-	len = list_len_deck(*deck);
-
-	if (!deck || !*deck || len < 2)
-		return;
-
-	curr = *deck;
-	while (curr)
-	{
-		if (curr->prev && card_value(curr) < card_value(curr->prev))
-		{
-			one = curr->prev->prev;
-			two = curr->prev;
-			three = curr;
-			four = curr->next;
-
-			two->next = four;
-			if (four)
-				four->prev = two;
-			three->next = two;
-			three->prev = one;
-			if (one)
-				one->next = three;
-			else
-				*deck = three;
-			two->prev = three;
-			curr = *deck;
-			continue;
-		}
-		else
-			curr = curr->next;
-	}
+    i = 0;
+    while (deck)
+    {
+        if (i)
+            printf(", ");
+        printf("{%s, %c}", deck->card->value, kinds[deck->card->kind]);
+        if (i == 12)
+            printf("\n");
+        i = (i + 1) % 13;
+        deck = deck->next;
+    }
 }
 
-/**
- * card_value - returns the value of a card
- * @node: card in a deck
- *
- * Return: value between 1 and 52
- */
-int card_value(deck_node_t *node)
+deck_node_t *init_deck(const card_t cards[52])
 {
-	char *val[13] = {"Ace", "2", "3", "4", "5", "6",
-		"7", "8", "9", "10", "Jack", "Queen", "King"};
-	char *kinds[4] = {"SPADE", "HEART", "CLUB", "DIAMOND"};
-	int i, kind_val = 0;
+    deck_node_t *deck;
+    deck_node_t *node;
+    size_t i;
 
-	for (i = 1; i <= 13; i++)
-	{
-		if (!_strcmp(node->card->value, val[i - 1]))
-			kind_val = i;
-	}
-
-	for (i = 1; i <= 4; i++)
-	{
-		if (!_strcmp(kinds[node->card->kind], kinds[i - 1]))
-			kind_val = kind_val + (13 * i);
-		}
-
-	return (kind_val);
+    i = 52;
+    deck = NULL;
+    while (i--)
+    {
+        node = malloc(sizeof(*node));
+        if (!node)
+            return (NULL);
+        node->card = &cards[i];
+        node->next = deck;
+        node->prev = NULL;
+        if (deck)
+            deck->prev = node;
+        deck = node;
+    }
+    return (deck);
 }
 
-/**
- * _strcmp - compares two strings
- * @s1: first string to compare
- * @s2: second string to compare
- *
- * Return: less than 0 if s1 is less than s2, 0 if they're equal,
- * more than 0 if s1 is greater than s2
- */
-int _strcmp(const char *s1, const char *s2)
+int main(void)
 {
-	while (*s1 == *s2)
-	{
-		if (*s1 == '\0')
-		{
-			return (0);
-		}
-		s1++;
-		s2++;
-	}
-	return (*s1 - *s2);
+    card_t cards[52] = {
+        {"Jack", CLUB}, {"4", HEART}, {"3", HEART}, {"3", DIAMOND}, {"Queen", HEART}, {"5", HEART}, {"5", SPADE}, {"10", HEART}, {"6", HEART}, {"5", DIAMOND}, {"6", SPADE}, {"9", HEART}, {"7", DIAMOND}, {"Jack", SPADE}, {"Ace", DIAMOND}, {"9", CLUB}, {"Jack", DIAMOND}, {"7", SPADE}, {"King", DIAMOND}, {"10", CLUB}, {"King", SPADE}, {"8", CLUB}, {"9", SPADE}, {"6", CLUB}, {"Ace", CLUB}, {"3", SPADE}, {"8", SPADE}, {"9", DIAMOND}, {"2", HEART}, {"4", DIAMOND}, {"6", DIAMOND}, {"3", CLUB}, {"Queen", CLUB}, {"10", SPADE}, {"8", DIAMOND}, {"8", HEART}, {"Ace", SPADE}, {"Jack", HEART}, {"2", CLUB}, {"4", SPADE}, {"2", SPADE}, {"2", DIAMOND}, {"King", CLUB}, {"Queen", SPADE}, {"Queen", DIAMOND}, {"7", CLUB}, {"7", HEART}, {"5", CLUB}, {"10", DIAMOND}, {"4", CLUB}, {"King", HEART}, {"Ace", HEART},
+    };
+    deck_node_t *deck;
+
+    deck = init_deck(cards);
+    print_deck(deck);
+    printf("\n");
+    sort_deck(&deck);
+    printf("\n");
+    print_deck(deck);
+    return (0);
 }
 
-/**
- * list_len_deck - function returns length of list
- * @list: head of list
- *
- * Return: length
- */
-size_t list_len_deck(deck_node_t *list)
-{
-	size_t len = 0;
-
-	while (list)
-	{
-		len++;
-		list = list->next;
-	}
-	return (len);
-}
