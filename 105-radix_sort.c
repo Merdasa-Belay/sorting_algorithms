@@ -54,5 +54,4 @@ void count_sort_LSD(int *array, size_t size, size_t lsd)
 
 	free(out_arr);
 }
-Footer
 
